@@ -1,5 +1,5 @@
 defmodule Overlook.User do
-  @c_lib "./lib/argon.so"
+  alias Argon2
 
   @required_keys [:name, :hash, :email]
 
@@ -21,9 +21,6 @@ defmodule Overlook.User do
   end
 
   def encrypt_password(password) do
-    salt = :crypto.strong_rand_bytes(16) |> Base.encode64()
-    System.cmd("c", ["#{@c_lib}", password, salt])
-    |> elem(1)
-    |> String.trim()
+    Argon2.hash_pwd_salt(password)
   end
 end

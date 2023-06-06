@@ -20,6 +20,8 @@ defmodule Overlook.MixProject do
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
-    []
+    [
+      {:argon2_elixir, "~> 3.0"}
+    ]
   end
 end
