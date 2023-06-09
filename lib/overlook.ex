@@ -21,7 +21,7 @@ defmodule Overlook do
   end
 
   def start() do
-    name = IO.gets("Username:") |> String.trim()
+    name = IO.gets("Name:") |> String.trim()
     password = IO.gets("Password:") |> String.trim() |> User.encrypt_password()
     email = IO.gets("Email:") |> String.trim()
 
