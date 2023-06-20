@@ -1,5 +1,6 @@
 defmodule Overlook.User do
   alias Argon2
+  alias Overlook.Password
 
   @required_keys [:name, :hash, :email]
 
@@ -16,11 +17,19 @@ defmodule Overlook.User do
   end
 
   def raw_print(user) do
-    "User Info:\n#{user.name}\n#{user.hash}\n#{user.email}"
+    "User Info:\nName: #{user.name}\nPassword Hash: #{user.hash}\nEmail: #{user.email}\nPasswords:"
     |> IO.puts()
+
+    Enum.map(user.passwords, fn p ->
+      IO.puts(
+        "{\nHash:#{p.hash}\nService:#{p.service}}\nKey:#{p.key}\nLinked ID(email/username):#{p.linked_id}\n}"
+      )
+    end)
   end
 
-  def encrypt_password(password) do
-    Argon2.hash_pwd_salt(password)
+  def register_new_password(password, service, user) do
+    new_password = Password.create_password(password, service)
+    updated_passwords = [new_password | user.passwords]
+    %{user | passwords: updated_passwords}
   end
 end
