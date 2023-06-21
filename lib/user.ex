@@ -17,7 +17,7 @@ defmodule Overlook.User do
   end
 
   def raw_print(user) do
-    "User Info:\nName: #{user.name}\nPassword Hash: #{user.hash}\nEmail: #{user.email}\nPasswords:"
+    "User Info\nName: #{user.name}\nPassword Hash: #{user.hash}\nEmail: #{user.email}\nPasswords:"
     |> IO.puts()
 
     Enum.map(user.passwords, fn p ->
@@ -28,8 +28,12 @@ defmodule Overlook.User do
   end
 
   def register_new_password(password, service, user) do
-    new_password = Password.create_password(password, service)
+    {pub_key, priv_key} = Password.generate_rsa_key()
+    encrypted_password = Password.encrypt_password(priv_key, password)
+    new_password = Password.create_password(encrypted_password, service, priv_key, pub_key)
+
     updated_passwords = [new_password | user.passwords]
+
     %{user | passwords: updated_passwords}
   end
 end
