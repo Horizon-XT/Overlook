@@ -29,7 +29,7 @@ defmodule Overlook.User do
   end
 
   def register_new_password(plain_text, service, user) do
-    key = Password.generate_key()
+    key = Password.generate_key(user.hash)
 
     encrypted_password = Password.encrypt_password(key, plain_text)
     

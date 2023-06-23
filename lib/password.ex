@@ -13,8 +13,12 @@ defmodule Overlook.Password do
     }
   end
 
-  def generate_key() do
-    :crypto.strong_rand_bytes(32)
+  def generate_key(password) do
+    salt = :crypto.strong_rand_bytes(16)
+    iterations = 10000
+    key_len = 32
+
+    :crypto.pbkdf2_hmac(:sha256, password, salt, iterations, key_len)
     |> Base.encode64()
   end
 
