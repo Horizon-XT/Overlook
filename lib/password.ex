@@ -1,57 +1,66 @@
 defmodule Overlook.Password do
-  @required_keys [:hash, :service, :priv_key, :pub_key]
+  @required_keys [:hash, :service, :key]
 
   @enforce_keys @required_keys
   defstruct @required_keys ++ [:linked_id]
 
-  def create_password(password, service, priv_key, pub_key) do
+  def create_password(password, service, key) do
     %Overlook.Password{
       hash: password,
       service: service,
-      priv_key: priv_key,
-      pub_key: pub_key,
+      key: key,
       linked_id: ""
     }
   end
 
-  def generate_rsa_key() do
-    :crypto.generate_key(:rsa, {4096, 65537})
-  end
-
-  # This function was from taken from here:
-  # https://stackoverflow.com/questions/22517250/how-to-convert-an-elixir-binary-to-a-string
-  defp raw_binary_to_string(raw) do
-    codepoints = String.codepoints(raw)
-
-    val =
-      Enum.reduce(codepoints, fn w, result ->
-        cond do
-          String.valid?(w) ->
-            result <> w
-
-          true ->
-            <<parsed::8>> = w
-            result <> <<parsed::utf8>>
-        end
-      end)
-
-    val
-  end
-
-  def encrypt_password(key, plain_text) do
-    :crypto.private_encrypt(:rsa_padding, plain_text, key, :rsa_pkcs1_padding)
+  def generate_key() do
+    :crypto.strong_rand_bytes(32)
     |> Base.encode64()
   end
 
-  def decrypt_password(key, encoded_cipher_text) do
-    cipher_text = Base.decode64(encoded_cipher_text)
-    binary_hash = IO.inspect(cipher_text, binaries: :as_binaries)
+  defp build_encrypted_str(i, e, t, a) do
+    encoded_iv = Base.encode64(i)
+    encoded_encrypted = Base.encode64(e)
+    encoded_tag = Base.encode64(t)
+    encoded_aad = Base.encode64(a)
 
-    :crypto.private_decrypt(:rsa_padding, binary_hash, key, :rsa_opt)
-    |> raw_binary_to_string()
+    encoded_iv <> ";" <> encoded_encrypted <> ";" <> encoded_tag <> ";" <> encoded_aad
+    |> Base.encode64()
+  end
+
+  defp decompose_encrypted_str(hash) do
+    {:ok, decoded} = Base.decode64(hash)
+    params = String.split(decoded, ";")
+    
+    [i64, e64, t64, a64] = params
+    
+    {:ok, i} = Base.decode64(i64)
+    {:ok, e} = Base.decode64(e64)
+    {:ok, t} = Base.decode64(t64)
+    {:ok, a} = Base.decode64(a64)
+
+    {i, e, t, a}
+  end
+
+  def encrypt_password(key, plain_text) do
+    {:ok, k} = Base.decode64(key)
+    iv = :crypto.strong_rand_bytes(16)
+    aad = :crypto.strong_rand_bytes(16)
+    
+    {encrypted, tag} = :crypto.crypto_one_time_aead(:aes_256_gcm, k, iv, plain_text, aad, true)
+
+    build_encrypted_str(iv, encrypted, tag, aad)
+  end
+
+  def decrypt_password(key, encoded_cipher_text) do
+    {:ok, k} = Base.decode64(key)
+    {iv, cipher_text, tag, aad} = decompose_encrypted_str(encoded_cipher_text)
+  
+    :crypto.crypto_one_time_aead(:aes_256_gcm, k, iv, cipher_text, aad, tag, false)
   end
 
   def hash_password(password) do
     Argon2.hash_pwd_salt(password)
+    |> Base.encode64()
   end
 end

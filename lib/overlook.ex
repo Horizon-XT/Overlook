@@ -17,7 +17,7 @@ defmodule Overlook do
   def hello do
     :world
 
-    IO.puts("Hello Danny! Wanna Play with us?")
+    IO.puts("Hello Danny! Do you wanna play with us?")
   end
 
   def start() do
@@ -42,5 +42,9 @@ defmodule Overlook do
     )
 
     User.register_new_password("banana", "gmail", user) |> User.raw_print()
+  end
+
+  def main() do
+    start()
   end
 end
