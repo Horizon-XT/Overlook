@@ -22,6 +22,7 @@ defmodule Overlook.User do
 
     Enum.map(user.passwords, fn p ->
       psswd = Password.decrypt_password(p.key, p.hash)
+
       IO.puts(
         "{\nPassword: #{psswd}\nService: #{p.service}\nKey: #{p.key}\nLinked ID(email/username): #{p.linked_id}\n}"
       )
@@ -32,7 +33,7 @@ defmodule Overlook.User do
     key = Password.generate_key(user.hash)
 
     encrypted_password = Password.encrypt_password(key, plain_text)
-    
+
     new_password = Password.create_password(encrypted_password, service, key)
 
     updated_passwords = [new_password | user.passwords]
