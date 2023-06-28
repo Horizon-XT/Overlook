@@ -22,13 +22,27 @@ defmodule Overlook.Password do
     |> Base.encode64()
   end
 
-  defp build_encrypted_str(i, e, t, a) do
+  defp generate_tag(cipher_text, key) do
+    :crypto.mac(:hmac, :sha256, key, cipher_text)
+  end
+
+  defp authenticate_tag(tag, cipher_text, key) do
+    if tag == generate_tag(cipher_text, key) do
+      IO.puts("\n>>>Data is safe\n")
+    else
+      IO.puts("\n>>>Data is compromised\n")
+    end
+  end
+
+  defp build_encrypted_str(i, e, t, a, m) do
     encoded_iv = Base.encode64(i)
     encoded_encrypted = Base.encode64(e)
     encoded_tag = Base.encode64(t)
     encoded_aad = Base.encode64(a)
+    encoded_mtag = Base.encode64(m)
 
-    (encoded_iv <> ";" <> encoded_encrypted <> ";" <> encoded_tag <> ";" <> encoded_aad)
+    (encoded_iv <>
+       ";" <> encoded_encrypted <> ";" <> encoded_tag <> ";" <> encoded_aad <> ";" <> encoded_mtag)
     |> Base.encode64()
   end
 
@@ -36,14 +50,15 @@ defmodule Overlook.Password do
     {:ok, decoded} = Base.decode64(hash)
     params = String.split(decoded, ";")
 
-    [i64, e64, t64, a64] = params
+    [i64, e64, t64, a64, m64] = params
 
     {:ok, i} = Base.decode64(i64)
     {:ok, e} = Base.decode64(e64)
     {:ok, t} = Base.decode64(t64)
     {:ok, a} = Base.decode64(a64)
+    {:ok, m} = Base.decode64(m64)
 
-    {i, e, t, a}
+    {i, e, t, a, m}
   end
 
   def encrypt_password(key, plain_text) do
@@ -54,12 +69,16 @@ defmodule Overlook.Password do
     {encrypted, tag} =
       :crypto.crypto_one_time_aead(:chacha20_poly1305, k, iv, plain_text, aad, true)
 
-    build_encrypted_str(iv, encrypted, tag, aad)
+    mtag = generate_tag(encrypted, key)
+
+    build_encrypted_str(iv, encrypted, tag, aad, mtag)
   end
 
   def decrypt_password(key, encoded_cipher_text) do
     {:ok, k} = Base.decode64(key)
-    {iv, cipher_text, tag, aad} = decompose_encrypted_str(encoded_cipher_text)
+    {iv, cipher_text, tag, aad, mtag} = decompose_encrypted_str(encoded_cipher_text)
+
+    authenticate_tag(mtag, cipher_text, key)
 
     :crypto.crypto_one_time_aead(:chacha20_poly1305, k, iv, cipher_text, aad, tag, false)
   end
