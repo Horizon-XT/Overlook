@@ -35,30 +35,17 @@ defmodule Overlook.Password do
   end
 
   defp build_encrypted_str(i, e, t, a, m) do
-    encoded_iv = Base.encode64(i)
-    encoded_encrypted = Base.encode64(e)
-    encoded_tag = Base.encode64(t)
-    encoded_aad = Base.encode64(a)
-    encoded_mtag = Base.encode64(m)
-
-    (encoded_iv <>
-       ";" <> encoded_encrypted <> ";" <> encoded_tag <> ";" <> encoded_aad <> ";" <> encoded_mtag)
+    [i, e, t, a, m]
+    |> Enum.join(";")
     |> Base.encode64()
   end
 
   defp decompose_encrypted_str(hash) do
     {:ok, decoded} = Base.decode64(hash)
-    params = String.split(decoded, ";")
 
-    [i64, e64, t64, a64, m64] = params
-
-    {:ok, i} = Base.decode64(i64)
-    {:ok, e} = Base.decode64(e64)
-    {:ok, t} = Base.decode64(t64)
-    {:ok, a} = Base.decode64(a64)
-    {:ok, m} = Base.decode64(m64)
-
-    {i, e, t, a, m}
+    decoded
+    |> String.split(";")
+    |> List.to_tuple()
   end
 
   def encrypt_password(key, plain_text) do
