@@ -30,7 +30,7 @@ defmodule Overlook do
     )
 
     name = "Link"
-    password = Password.hash_password("zelda123")
+    password = Password.hash_password("zelda123") |> Base.encode64()
     email = "link@hyrule.com"
 
     user = User.create_user(name, password, email)
@@ -41,7 +41,9 @@ defmodule Overlook do
       "\n---------------------------------------------------------------------------------\n"
     )
 
-    User.register_new_password("banana", "gmail", user) |> User.raw_print()
+    # User.register_new_password("banana", "gmail", user) |> User.raw_print()
+    IO.puts(">>> Authorizing user")
+    IO.puts(User.authenticate_user("zelda123", user.hash))
   end
 
   def main() do
