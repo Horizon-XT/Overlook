@@ -27,6 +27,12 @@ defmodule Overlook.User do
     end)
   end
 
+  def authenticate_user(password, stored_encoded_hash) do
+    {:ok, hash} = Base.decode64(stored_encoded_hash)
+
+    Password.verify_pass(password, hash)
+  end
+
   def register_new_password(plain_text, service, user) do
     key = Password.generate_key(user.hash)
 
@@ -39,9 +45,7 @@ defmodule Overlook.User do
     %{user | passwords: updated_passwords}
   end
 
-  def authenticate_user(password, stored_encoded_hash) do
-    {:ok, hash} = Base.decode64(stored_encoded_hash)
-
-    Password.verify_pass(password, hash)
+  def service_list(user) do
+    Enum.map(user.passwords, fn pass -> pass.service end)
   end
 end
