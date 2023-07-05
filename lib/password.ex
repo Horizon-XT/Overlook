@@ -72,6 +72,9 @@ defmodule Overlook.Password do
 
   def hash_password(password) do
     Argon2.hash_pwd_salt(password)
-    |> Base.encode64()
+  end
+
+  def verify_pass(password, stored_hash) do
+    Argon2.verify_pass(password, stored_hash)
   end
 end
