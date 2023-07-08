@@ -41,9 +41,21 @@ defmodule Overlook do
       "\n---------------------------------------------------------------------------------\n"
     )
 
-    # User.register_new_password("banana", "gmail", user) |> User.raw_print()
+    user = User.register_new_password("banana", "gmail", user)
+
+    IO.puts(
+      "\n---------------------------------------------------------------------------------\n"
+    )
+
     IO.puts(">>> Authorizing user")
     IO.puts(User.authenticate_user("zelda123", user.hash))
+
+    IO.puts(
+      "\n---------------------------------------------------------------------------------\n"
+    )
+
+    IO.puts(">>> User services")
+    IO.puts(User.service_list(user))
   end
 
   def main() do
