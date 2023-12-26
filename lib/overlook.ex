@@ -1,28 +1,15 @@
 defmodule Overlook do
-  alias Overlook.{User, Password}
+  alias Overlook.{User, SecretManager}
 
-  @moduledoc """
-  Documentation for `Overlook`.
-  """
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Overlook.hello()
-      :world
-
-  """
   def hello do
     :world
 
     IO.puts("Hello Danny! Do you wanna play with us?")
   end
 
-  def start() do
+  def demo() do
     # name = IO.gets("Name:") |> String.trim()
-    # password = IO.gets("Password:") |> String.trim() |> Password.hash_password()
+    # password = IO.gets("SecretManager:") |> String.trim() |> Password.hash_password()
     # email = IO.gets("Email:") |> String.trim()
 
     IO.puts(
@@ -30,10 +17,10 @@ defmodule Overlook do
     )
 
     name = "Link"
-    password = Password.hash_password("zelda123") |> Base.encode64()
+    secret = SecretManager.hash("zelda123") |> Base.encode64()
     email = "link@hyrule.com"
 
-    user = User.create_user(name, password, email)
+    user = User.create_user(name, secret, email)
 
     User.raw_print(user)
 
@@ -41,7 +28,8 @@ defmodule Overlook do
       "\n---------------------------------------------------------------------------------\n"
     )
 
-    user = User.register_new_password("banana", "gmail", user)
+    IO.puts(">>> Registering a new secret")
+    user = User.register_new_secret("banana", "gmail", user)
 
     IO.puts(
       "\n---------------------------------------------------------------------------------\n"
@@ -56,6 +44,21 @@ defmodule Overlook do
 
     IO.puts(">>> User services")
     IO.puts(User.service_list(user))
+
+    IO.puts(
+      "\n---------------------------------------------------------------------------------\n"
+    )
+
+    IO.puts(">>> User Secrets")
+    User.raw_print(user)
+
+    IO.puts(
+      "\n---------------------------------------------------------------------------------\n"
+    )
+  end
+
+  def start() do
+    IO.puts("Real App goes here")
   end
 
   def main() do

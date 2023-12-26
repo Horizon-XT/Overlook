@@ -1,24 +1,24 @@
-defmodule Overlook.Password do
+defmodule Overlook.SecretManager do
   @required_keys [:hash, :service, :key]
 
   @enforce_keys @required_keys
   defstruct @required_keys ++ [:linked_id]
 
-  def create_password(password, service, key) do
-    %Overlook.Password{
-      hash: password,
+  def create_secret(secret, service, key) do
+    %Overlook.SecretManager{
+      hash: secret,
       service: service,
       key: key,
       linked_id: ""
     }
   end
 
-  def generate_key(password) do
+  def generate_key(secret) do
     salt = :crypto.strong_rand_bytes(16)
     iterations = 10000
     key_len = 32
 
-    :crypto.pbkdf2_hmac(:sha256, password, salt, iterations, key_len)
+    :crypto.pbkdf2_hmac(:sha256, secret, salt, iterations, key_len)
     |> Base.encode64()
   end
 
@@ -48,7 +48,7 @@ defmodule Overlook.Password do
     |> List.to_tuple()
   end
 
-  def encrypt_password(key, plain_text) do
+  def encrypt_secret(key, plain_text) do
     {:ok, k} = Base.decode64(key)
     iv = :crypto.strong_rand_bytes(12)
     aad = :crypto.strong_rand_bytes(16)
@@ -61,7 +61,7 @@ defmodule Overlook.Password do
     build_encrypted_str(iv, encrypted, tag, aad, mtag)
   end
 
-  def decrypt_password(key, encoded_cipher_text) do
+  def decrypt_secret(key, encoded_cipher_text) do
     {:ok, k} = Base.decode64(key)
     {iv, cipher_text, tag, aad, mtag} = decompose_encrypted_str(encoded_cipher_text)
 
@@ -70,11 +70,11 @@ defmodule Overlook.Password do
     :crypto.crypto_one_time_aead(:chacha20_poly1305, k, iv, cipher_text, aad, tag, false)
   end
 
-  def hash_password(password) do
-    Argon2.hash_pwd_salt(password)
+  def hash(secret) do
+    Argon2.hash_pwd_salt(secret)
   end
 
-  def verify_pass(password, stored_hash) do
-    Argon2.verify_pass(password, stored_hash)
+  def verify_pass(secret, stored_hash) do
+    Argon2.verify_pass(secret, stored_hash)
   end
 end
