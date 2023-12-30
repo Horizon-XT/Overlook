@@ -20,37 +20,37 @@ defmodule Overlook do
     secret = SecretManager.hash("zelda123") |> Base.encode64()
     email = "link@hyrule.com"
 
-    user = User.create_user(name, secret, email)
+    user = User.Controller.create_user(name, secret, email)
 
-    User.raw_print(user)
+    User.Controller.print(user)
 
     IO.puts(
       "\n---------------------------------------------------------------------------------\n"
     )
 
     IO.puts(">>> Registering a new secret")
-    user = User.register_new_secret("banana", "gmail", user)
+    user = User.Controller.register_new_secret("banana", "gmail", user)
 
     IO.puts(
       "\n---------------------------------------------------------------------------------\n"
     )
 
     IO.puts(">>> Authorizing user")
-    IO.puts(User.authenticate_user("zelda123", user.hash))
+    IO.puts(User.Controller.authenticate_user("zelda123", user.hash))
 
     IO.puts(
       "\n---------------------------------------------------------------------------------\n"
     )
 
     IO.puts(">>> User services")
-    IO.puts(User.service_list(user))
+    IO.puts(User.Controller.service_list(user))
 
     IO.puts(
       "\n---------------------------------------------------------------------------------\n"
     )
 
     IO.puts(">>> User Secrets")
-    User.raw_print(user)
+    User.Controller.print(user)
 
     IO.puts(
       "\n---------------------------------------------------------------------------------\n"

@@ -1,22 +1,12 @@
-defmodule Overlook.User do
-  alias Argon2
+defmodule Overlook.User.Controller do
+  alias Overlook.{User}
   alias Overlook.SecretManager
 
-  @required_keys [:name, :hash, :email]
-
-  @enforce_keys @required_keys
-  defstruct @required_keys ++ [:secrets]
-
-  def create_user(name, hash, email) do
-    %Overlook.User{
-      name: name,
-      hash: hash,
-      email: email,
-      secrets: []
-    }
+  def create_user(n, h, e) do
+    User.Model.create(n, h, e)
   end
 
-  def raw_print(user) do
+  def print(user) do
     "User Info\nName: #{user.name}\nSecret Hash: #{user.hash}\nEmail: #{user.email}\nSecrets:"
     |> IO.puts()
 
