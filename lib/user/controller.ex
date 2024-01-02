@@ -1,9 +1,16 @@
 defmodule Overlook.User.Controller do
-  alias Overlook.{User}
-  alias Overlook.SecretManager
+  alias Overlook.{User, Secret}
 
   def create_user(n, h, e) do
     User.Model.create(n, h, e)
+  end
+
+  def hash(secret) do
+    Argon2.hash_pwd_salt(secret)
+  end
+
+  def verify_pass(secret, stored_hash) do
+    Argon2.verify_pass(secret, stored_hash)
   end
 
   def print(user) do
@@ -20,15 +27,15 @@ defmodule Overlook.User.Controller do
   def authenticate_user(secret, stored_encoded_hash) do
     {:ok, hash} = Base.decode64(stored_encoded_hash)
 
-    SecretManager.verify_pass(secret, hash)
+    verify_pass(secret, hash)
   end
 
   def register_new_secret(plain_text, service, user) do
-    key = SecretManager.generate_key(user.hash)
+    key = Secret.Controller.generate_key(user.hash)
 
-    encrypted_secret = SecretManager.encrypt_secret(key, plain_text)
+    encrypted_secret = Secret.Controller.encrypt(key, plain_text)
 
-    new_secret = SecretManager.create_secret(encrypted_secret, service, key)
+    new_secret = Secret.Controller.create(encrypted_secret, service, key)
 
     updated_secrets = [new_secret | user.secrets]
 

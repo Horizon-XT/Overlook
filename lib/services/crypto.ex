@@ -1,18 +1,4 @@
-defmodule Overlook.SecretManager do
-  @required_keys [:hash, :service, :key]
-
-  @enforce_keys @required_keys
-  defstruct @required_keys ++ [:linked_id]
-
-  def create_secret(secret, service, key) do
-    %Overlook.SecretManager{
-      hash: secret,
-      service: service,
-      key: key,
-      linked_id: ""
-    }
-  end
-
+defmodule Overlook.Services.Crypto do
   def generate_key(secret) do
     salt = :crypto.strong_rand_bytes(16)
     iterations = 10000
@@ -68,13 +54,5 @@ defmodule Overlook.SecretManager do
     authenticate_tag(mtag, cipher_text, key)
 
     :crypto.crypto_one_time_aead(:chacha20_poly1305, k, iv, cipher_text, aad, tag, false)
-  end
-
-  def hash(secret) do
-    Argon2.hash_pwd_salt(secret)
-  end
-
-  def verify_pass(secret, stored_hash) do
-    Argon2.verify_pass(secret, stored_hash)
   end
 end

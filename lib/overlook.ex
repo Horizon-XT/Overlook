@@ -1,5 +1,5 @@
 defmodule Overlook do
-  alias Overlook.{User, SecretManager}
+  alias Overlook.{User, Secret}
 
   def hello do
     :world
@@ -17,7 +17,7 @@ defmodule Overlook do
     )
 
     name = "Link"
-    secret = SecretManager.hash("zelda123") |> Base.encode64()
+    secret = User.Controller.hash("zelda123") |> Base.encode64()
     email = "link@hyrule.com"
 
     user = User.Controller.create_user(name, secret, email)
