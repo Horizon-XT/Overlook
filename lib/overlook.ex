@@ -17,10 +17,10 @@ defmodule Overlook do
     )
 
     name = "Link"
-    secret = User.Controller.hash("zelda123") |> Base.encode64()
+    passphrase = "zelda123"
     email = "link@hyrule.com"
 
-    user = User.Controller.create_user(name, secret, email)
+    user = User.Controller.create_user(name, passphrase, email)
 
     User.Controller.print(user)
 
@@ -55,13 +55,26 @@ defmodule Overlook do
     IO.puts(
       "\n---------------------------------------------------------------------------------\n"
     )
+
+    IO.puts(
+      "\n---------------------------------------------------------------------------------\n"
+    )
+
+    IO.puts(">>> Retrieving secret by service")
+    # TODO: validate service name!
+    pass = User.Controller.retrieve_secret_by_service("gmail", user)
+    IO.puts(pass)
+
+    IO.puts(
+      "\n---------------------------------------------------------------------------------\n"
+    )
   end
 
-  def start() do
+  def start_server() do
     IO.puts("Real App goes here")
   end
 
   def main() do
-    start()
+    start_server()
   end
 end
