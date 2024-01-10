@@ -8,10 +8,6 @@ defmodule Overlook do
   end
 
   def demo() do
-    # name = IO.gets("Name:") |> String.trim()
-    # password = IO.gets("SecretManager:") |> String.trim() |> Password.hash_password()
-    # email = IO.gets("Email:") |> String.trim()
-
     IO.puts(
       "\n---------------------------------------------------------------------------------\n"
     )

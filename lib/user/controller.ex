@@ -1,8 +1,9 @@
 defmodule Overlook.User.Controller do
-  alias Overlook.{User, Secret}
+  alias Overlook.{Services, User, Secret}
 
-  defp hash(secret) do
-    Argon2.hash_pwd_salt(secret)
+  defp hash(passphrase) do
+    # Argon2.hash_pwd_salt(secret)
+    Services.Crypto.hash(passphrase)
   end
 
   def create_user(name, passphrase, e) do
@@ -11,7 +12,8 @@ defmodule Overlook.User.Controller do
   end
 
   defp verify_pass(secret, stored_hash) do
-    Argon2.verify_pass(secret, stored_hash)
+    # Argon2.verify_pass(secret, stored_hash)
+    Services.Crypto.verify_pass(secret, stored_hash)
   end
 
   def authenticate_user(secret, stored_encoded_hash) do

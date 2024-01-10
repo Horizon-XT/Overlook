@@ -1,4 +1,15 @@
 defmodule Overlook.Services.Crypto do
+  def hash(passphrase) do
+    :crypto.hash(:sha256, passphrase)
+  end
+
+  def verify_pass(secret, stored_hash) do
+    hash = hash(secret)
+    # TODO Update crypto version
+    # :crypto.hash_equals(hash, stored_hash)
+    hash == stored_hash
+  end
+
   def generate_key(secret) do
     salt = :crypto.strong_rand_bytes(16)
     iterations = 10000
